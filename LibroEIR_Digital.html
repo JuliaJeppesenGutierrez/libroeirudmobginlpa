@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libro EIR Digital · UDMOBGIN Las Palmas</title>
+<style>
+  :root {
+    --navy: #1a3a5c;
+    --mid:  #2e6da4;
+    --sky:  #5ba0bd;
+    --light:#e8f0f7;
+    --bg:   #f4f7fb;
+    --white:#ffffff;
+    --text: #1e2b3a;
+    --muted:#5a6a7a;
+    --ok:   #1d8348;
+    --warn: #d35400;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(26,58,92,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* ── HEADER ── */
+  header{background:linear-gradient(135deg,var(--navy),var(--mid));color:#fff;padding:18px 24px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+  header h1{font-size:1.1rem;font-weight:700;letter-spacing:.01em;}
+  header p{font-size:.78rem;opacity:.75;margin-top:2px;}
+  .header-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .resident-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:.78rem;cursor:pointer;transition:background .15s;}
+  .resident-badge:hover{background:rgba(255,255,255,.25);}
+
+  /* ── NAV TABS ── */
+  nav{background:var(--navy);display:flex;overflow-x:auto;scrollbar-width:none;padding:0 12px;}
+  nav::-webkit-scrollbar{display:none;}
+  nav button{background:none;border:none;color:rgba(255,255,255,.65);font-size:.78rem;font-weight:600;padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .15s;letter-spacing:.03em;}
+  nav button.active{color:#fff;border-bottom-color:var(--sky);}
+  nav button:hover:not(.active){color:rgba(255,255,255,.9);}
+
+  /* ── MAIN ── */
+  main{max-width:780px;margin:0 auto;padding:20px 16px 60px;}
+
+  /* ── SECTION CARD ── */
+  .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden;}
+  .card-head{background:var(--navy);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .card-head h2{font-size:.92rem;font-weight:700;letter-spacing:.01em;}
+  .card-head .badge{background:rgba(255,255,255,.2);border-radius:20px;font-size:.72rem;padding:3px 10px;white-space:nowrap;}
+  .card-body{padding:14px 16px;}
+
+  /* ── PROGRESS BAR ── */
+  .prog-wrap{margin-bottom:8px;}
+  .prog-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-bottom:4px;}
+  .prog-label span:last-child{font-weight:700;color:var(--navy);}
+  .prog-bar{height:8px;background:var(--light);border-radius:4px;overflow:hidden;}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--mid));border-radius:4px;transition:width .4s ease;}
+  .prog-fill.done{background:linear-gradient(90deg,#27ae60,#1d8348);}
+
+  /* ── ACTIVIDADES MÍNIMAS ── */
+  .act-list{display:flex;flex-direction:column;gap:10px;}
+  .act-item{background:var(--bg);border-radius:8px;padding:12px 14px;border-left:4px solid var(--sky);}
+  .act-item.done{border-left-color:var(--ok);}
+  .act-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+  .act-desc{font-size:.83rem;line-height:1.4;flex:1;}
+  .act-target{font-size:.75rem;color:var(--muted);white-space:nowrap;}
+  .act-controls{display:flex;align-items:center;gap:8px;}
+  .act-controls button{width:32px;height:32px;border-radius:50%;border:2px solid var(--mid);background:var(--white);color:var(--mid);font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+  .act-controls button:hover{background:var(--mid);color:#fff;}
+  .act-count{min-width:46px;text-align:center;font-size:1rem;font-weight:700;color:var(--navy);}
+
+  /* ── REGISTRO RÁPIDO (+ botón flotante) ── */
+  .fab{position:fixed;bottom:24px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--mid);border:none;color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(26,58,92,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;z-index:50;}
+  .fab:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(26,58,92,.45);}
+
+  /* ── MODAL ── */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(20,35,55,.55);z-index:200;align-items:flex-end;justify-content:center;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:18px 18px 0 0;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:20px 20px 32px;}
+  .modal h3{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:14px;}
+  .modal label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:4px;margin-top:12px;}
+  .modal select,.modal input,.modal textarea{width:100%;border:1.5px solid #d0dcea;border-radius:8px;padding:9px 11px;font-size:.88rem;font-family:inherit;color:var(--text);outline:none;transition:border-color .15s;background:var(--white);}
+  .modal select:focus,.modal input:focus,.modal textarea:focus{border-color:var(--mid);}
+  .modal textarea{min-height:70px;resize:vertical;}
+  .btn-row{display:flex;gap:10px;margin-top:18px;}
+  .btn{flex:1;padding:11px;border-radius:8px;border:none;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .15s;}
+  .btn-primary{background:var(--mid);color:#fff;}
+  .btn-primary:hover{background:var(--navy);}
+  .btn-cancel{background:var(--light);color:var(--navy);}
+  .btn-cancel:hover{background:#d0dcea;}
+
+  /* ── SESIONES ── */
+  .sesion-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--light);}
+  .sesion-row:last-child{border:none;}
+  .sesion-num{width:28px;height:28px;border-radius:50%;background:var(--light);color:var(--navy);font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .sesion-row.signed .sesion-num{background:var(--ok);color:#fff;}
+  .sesion-info{flex:1;min-width:0;}
+  .sesion-tema{font-size:.83rem;font-weight:700;color:var(--navy);margin-bottom:1px;}
+  .sesion-date{font-size:.78rem;color:var(--muted);}
+  .sesion-firma{font-size:.78rem;color:var(--ok);font-weight:600;}
+  .sesion-btn{font-size:.75rem;padding:5px 10px;border-radius:6px;border:1.5px solid var(--mid);background:var(--white);color:var(--mid);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;}
+  .sesion-btn:hover{background:var(--mid);color:#fff;}
+
+  /* ── ROTACIONES ── */
+  .rota-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--bg);margin-bottom:8px;}
+  .rota-dot{width:10px;height:10px;border-radius:50%;background:var(--sky);flex-shrink:0;}
+  .rota-dot.ok{background:var(--ok);}
+  .rota-info{flex:1;min-width:0;}
+  .rota-title{font-size:.85rem;font-weight:600;}
+  .rota-dates{font-size:.74rem;color:var(--muted);margin-top:1px;}
+  .rota-signed{font-size:.72rem;color:var(--ok);font-weight:700;}
+
+  /* ── DATOS PERSONALES ── */
+  .dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:400px){.dp-grid{grid-template-columns:1fr;}}
+  .dp-field label{font-size:.74rem;color:var(--muted);font-weight:600;display:block;margin-bottom:3px;}
+  .dp-field input{width:100%;border:1.5px solid #d0dcea;border-radius:7px;padding:8px 10px;font-size:.85rem;font-family:inherit;outline:none;transition:border-color .15s;}
+  .dp-field input:focus{border-color:var(--mid);}
+  .dp-field.full{grid-column:1/-1;}
+  .save-btn{margin-top:14px;background:var(--mid);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:.88rem;font-weight:700;cursor:pointer;width:100%;}
+  .save-btn:hover{background:var(--navy);}
+
+  /* ── DASHBOARD OVERVIEW ── */
+  .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:380px){.overview-grid{grid-template-columns:1fr;}}
+  .ov-card{background:var(--bg);border-radius:10px;padding:14px;text-align:center;border:2px solid transparent;}
+  .ov-card.highlight{border-color:var(--sky);}
+  .ov-num{font-size:1.8rem;font-weight:800;color:var(--navy);line-height:1;}
+  .ov-label{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.3;}
+  .ov-sub{font-size:.7rem;color:var(--ok);font-weight:700;margin-top:3px;}
+
+  /* ── COMPETENCIAS ── */
+  .comp-area{margin-bottom:14px;}
+  .comp-area-title{font-size:.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--light);}
+  .comp-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--light);}
+  .comp-row:last-child{border:none;}
+  .comp-desc{flex:1;font-size:.8rem;line-height:1.4;}
+  .star-row{display:flex;gap:3px;}
+  .star{font-size:1.1rem;cursor:pointer;color:#d0dcea;transition:color .1s;}
+  .star.on{color:#f39c12;}
+
+  /* ── BACKUP REMINDER ── */
+  .backup-reminder{background:#fff6e9;border:1.5px solid #f0c479;border-left:5px solid var(--warn);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
+  .backup-reminder span{display:block;font-size:.82rem;color:#7a4a10;line-height:1.45;font-weight:600;margin-bottom:8px;}
+  .reminder-actions{display:flex;gap:8px;}
+  .reminder-actions button{flex:1;padding:8px;border-radius:7px;border:none;font-size:.8rem;font-weight:700;cursor:pointer;background:var(--warn);color:#fff;}
+  .reminder-actions button.dismiss{background:#f3e3c8;color:#7a4a10;}
+
+  /* ── FIRMAS ── */
+  .firma-label{font-size:.78rem;font-weight:700;color:var(--navy);display:block;margin-bottom:6px;}
+  .firma-preview{border:1.5px solid var(--light);border-radius:8px;height:90px;background:#fcfdfe;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .firma-preview img{max-height:84px;max-width:100%;}
+  .firma-preview .empty{font-size:.78rem;color:var(--muted);font-style:italic;}
+
+  /* ── TABS CONTENT ── */
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* ── CHIP FILTERS ── */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .chip{background:var(--light);border:none;color:var(--navy);border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;}
+  .chip.active{background:var(--mid);color:#fff;}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:22px;font-size:.82rem;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ── CURSOS ── */
+  .curso-item{background:var(--bg);border-radius:8px;padding:11px 13px;margin-bottom:8px;border-left:3px solid var(--sky);}
+  .curso-title{font-size:.85rem;font-weight:700;}
+  .curso-meta{font-size:.74rem;color:var(--muted);margin-top:3px;}
+  .tag{display:inline-block;background:var(--light);color:var(--navy);border-radius:4px;font-size:.68rem;padding:2px 6px;font-weight:600;}
+
+  /* ── REFLEXIONES ── */
+  .reflex-card{background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+  .reflex-header{display:flex;justify-content:space-between;margin-bottom:6px;}
+  .reflex-rota{font-size:.83rem;font-weight:700;}
+  .reflex-date{font-size:.74rem;color:var(--muted);}
+  .reflex-body{font-size:.8rem;line-height:1.5;color:var(--text);}
+
+  /* ── ENTREVISTAS ── */
+  .entrevista-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--light);}
+  .entrevista-item:last-child{border:none;}
+  .ent-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ent-info{flex:1;}
+  .ent-meta{font-size:.8rem;}
+  .ent-firma{font-size:.74rem;color:var(--ok);font-weight:600;}
+  .ent-empty{font-size:.78rem;color:var(--muted);font-style:italic;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div>
+      <h1>📒 Libro EIR Digital</h1>
+      <p>UDMOBGIN · Las Palmas de Gran Canaria</p>
+    </div>
+    <button class="resident-badge" onclick="showTab('perfil')" id="nameTag">⚙ Mi perfil</button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('inicio')">Inicio</button>
+  <button onclick="showTab('actividades')">Actividades</button>
+  <button onclick="showTab('sesiones')">Sesiones</button>
+  <button onclick="showTab('rotaciones')">Rotaciones</button>
+  <button onclick="showTab('cursos')">Cursos</button>
+  <button onclick="showTab('competencias')">Competencias</button>
+  <button onclick="showTab('reflexiones')">Reflexiones</button>
+  <button onclick="showTab('entrevistas')">Entrevistas</button>
+  <button onclick="showTab('perfil')">Perfil</button>
+</nav>
+
+<main>
+
+<div id="backupReminder" class="backup-reminder" style="display:none;">
+  <span id="backupReminderText"></span>
+  <div class="reminder-actions">
+    <button onclick="hacerCopia()">Hacer copia</button>
+    <button class="dismiss" onclick="dismissReminder()">Ahora no</button>
+  </div>
+</div>
+
+<!-- ══ INICIO ══ -->
+<div id="tab-inicio" class="tab-content active">
+  <div class="card">
+    <div class="card-head"><h2>📊 Resumen del progreso</h2></div>
+    <div class="card-body">
+      <div class="overview-grid" id="overviewGrid"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>⚡ Actividades más urgentes</h2><span class="badge" id="urgentBadge">—</span></div>
+    <div class="card-body" id="urgentList"></div>
+  </div>
+</div>
+
+<!-- ══ ACTIVIDADES ══ -->
+<div id="tab-actividades" class="tab-content">
+  <div class="chips" id="actChips"></div>
+  <div id="actList"></div>
+</div>
+
+<!-- ══ SESIONES ══ -->
+<div id="tab-sesiones" class="tab-content">
+  <div class="card">
+    <div class="card-head">
+      <h2>📋 Sesiones clínicas</h2>
+      <span class="badge" id="sesionBadge">—</span>
+    </div>
+    <div class="card-body" id="sesionList"></div>
+  </div>
+  <p style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5;">
+    Cambio de guardia diario 08:15 · Casos clínicos lunes · Sesión general martes
+  </p>
+</div>
+
+<!-- ══ ROTACIONES ══ -->
+<div id="tab-rotaciones" class="tab-content">
+  <div class="card">
+    <div class="card-head"><h2>🔄 R1 – Primer año</h2></div>
+    <div class="card-body" id="rotaR1"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>🔄 R2 – Segundo año</h2></div>
+    <div class="card-body" id="rotaR2"></div>
+  </div>
+</div>
+
+<!-- ══ CURSOS ══ -->
+<div id="tab-cursos" class="tab-content">
+  <div class="card">
+    <div class="card-head"><h2>🎓 Cursos y talleres</h2><span class="badge" id="cursosBadge">0 registrados</span></div>
+    <div class="card-body" id="cursosList"></div>
+  </div>
+  <button class="fab" onclick="openModal('curso')" style="bottom:24px;" title="Añadir curso">+</button>
+</div>
+
+<!-- ══ COMPETENCIAS ══ -->
+<div id="tab-competencias" class="tab-content">
+  <p style="font-size:.78rem;color:var(--muted);margin-bottom:14px;line-height:1.5;">Autoevalúa cada competencia con 1–5 estrellas (1 = inicio, 5 = dominio). La tutora revisará y firmará en la entrevista trimestral.</p>
+  <div id="compList"></div>
+</div>
+
+<!-- ══ REFLEXIONES ══ -->
+<div id="tab-reflexiones" class="tab-content">
+  <div class="card">
+    <div class="card-head"><h2>✍️ Informes de reflexión</h2><span class="badge">Una por rotación</span></div>
+    <div class="card-body" id="reflexList"><p style="font-size:.82rem;color:var(--muted);">Aún no hay reflexiones registradas. Usa el botón + al completar cada rotación.</p></div>
+  </div>
+  <button class="fab" onclick="openModal('reflex')" title="Añadir reflexión">+</button>
+</div>
+
+<!-- ══ ENTREVISTAS ══ -->
+<div id="tab-entrevistas" class="tab-content">
+  <div class="card">
+    <div class="card-head"><h2>🤝 Entrevistas con la tutora</h2><span class="badge">Mín. una/trimestre</span></div>
+    <div class="card-body" id="entrevistaList"></div>
+  </div>
+  <button class="fab" onclick="openModal('entrevista')" title="Registrar entrevista">+</button>
+</div>
+
+<!-- ══ PERFIL ══ -->
+<div id="tab-perfil" class="tab-content">
+  <div class="card">
+    <div class="card-head"><h2>👤 Datos personales</h2></div>
+    <div class="card-body">
+      <div class="dp-grid">
+        <div class="dp-field"><label>Nombre</label><input id="dp-nombre" placeholder="Nombre"></div>
+        <div class="dp-field"><label>Apellidos</label><input id="dp-apellidos" placeholder="Apellidos"></div>
+        <div class="dp-field full"><label>Correo electrónico</label><input id="dp-email" type="email" placeholder="correo@ejemplo.es"></div>
+        <div class="dp-field"><label>Promoción</label><input id="dp-promo" placeholder="2026-2028"></div>
+        <div class="dp-field"><label>Fecha toma de posesión</label><input id="dp-fecha" type="date"></div>
+        <div class="dp-field full"><label>Nombre de la tutora</label><input id="dp-tutora" placeholder="Nombre de la tutora"></div>
+        <div class="dp-field full"><label>Correo de la tutora</label><input id="dp-tutora-email" type="email" placeholder="tutora@ejemplo.es"></div>
+      </div>
+      <button class="save-btn" onclick="savePerfil()">💾 Guardar perfil</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="card-head"><h2>✍️ Firmas digitales</h2></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;line-height:1.5;color:var(--muted);margin-bottom:12px;">Estas firmas se incrustan en el PDF oficial que se entrega a la Unidad Docente. Firma con el dedo (móvil) o el ratón (ordenador).</p>
+      <div class="firma-block">
+        <label class="firma-label">Firma de la residente</label>
+        <div class="firma-preview" id="firmaResPreview"></div>
+        <button class="btn btn-cancel" style="width:100%;margin-top:8px;" onclick="openFirma('residente')">✍️ Firmar / actualizar</button>
+      </div>
+      <div class="firma-block" style="margin-top:14px;">
+        <label class="firma-label">Firma de la tutora</label>
+        <div class="firma-preview" id="firmaTutPreview"></div>
+        <button class="btn btn-cancel" style="width:100%;margin-top:8px;" onclick="openFirma('tutora')">✍️ Firmar / actualizar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-head"><h2>💾 Copia de seguridad</h2><span class="badge" id="backupBadge">—</span></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;line-height:1.5;color:var(--muted);margin-bottom:12px;">Tus datos se guardan solo en este móvil. Haz una copia con regularidad y guárdala en tu Drive o envíatela por correo. Así no perderás nada si cambias de dispositivo o se borran los datos del navegador.</p>
+      <button class="save-btn" onclick="hacerCopia()">💾 Hacer copia de seguridad</button>
+      <button class="btn btn-cancel" style="margin-top:10px;width:100%;" onclick="restaurarCopia()">♻️ Restaurar copia</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-head"><h2>📄 Documento oficial</h2></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;line-height:1.5;color:var(--muted);margin-bottom:12px;">Genera el libro completo en PDF, con todas las actividades, rotaciones, sesiones, competencias y firmas, listo para imprimir o entregar a la Unidad Docente.</p>
+      <button class="save-btn" onclick="generarPDF()">📄 Generar PDF del libro completo</button>
+      <button class="btn btn-cancel" style="margin-top:10px;width:100%;color:var(--warn);" onclick="resetAll()">🗑 Borrar todos los datos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DE FIRMA ══ -->
+<div class="overlay" id="firmaOverlay" onclick="closeFirma(event)">
+  <div class="modal" id="firmaModal" style="max-width:460px;">
+    <h3 id="firmaTitle">Firmar</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">Dibuja tu firma en el recuadro:</p>
+    <canvas id="firmaCanvas" width="420" height="180" style="width:100%;border:2px dashed #c0d0e0;border-radius:10px;background:#fcfdfe;touch-action:none;cursor:crosshair;"></canvas>
+    <div class="btn-row">
+      <button class="btn btn-cancel" onclick="clearFirma()">Limpiar</button>
+      <button class="btn btn-cancel" onclick="closeFirma()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFirma()">Guardar firma</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ══ FAB GLOBAL ══ -->
+<button class="fab" id="fabGlobal" onclick="openModal('actividad')" title="Registrar actividad">+</button>
+
+<!-- ══ MODAL ══ -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <h3 id="modalTitle">Registrar</h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+
+const ACTIVIDADES = [
+  { id:'hc',    cat:'AP',        desc:'Entrevista y confección de historia clínica de salud reproductiva',          meta:100 },
+  { id:'bro',   cat:'AP',        desc:'Control y asistencia de gestantes (reconocimientos prenatales)',              meta:100 },
+  { id:'aro',   cat:'AP',        desc:'Vigilar y asistir a gestantes de alto riesgo',                               meta:40  },
+  { id:'em',    cat:'AP',        desc:'Programa de Educación Maternal (grupos completos)',                           meta:2   },
+  { id:'part',  cat:'Paritorio', desc:'Asistir a parturientas con medios clínicos y técnicos adecuados',            meta:100 },
+  { id:'norm',  cat:'Paritorio', desc:'Asistir a partos normales',                                                  meta:80  },
+  { id:'aro2',  cat:'Paritorio', desc:'Asistir a parturientas de alto riesgo',                                      meta:40  },
+  { id:'instru',cat:'Paritorio', desc:'Atención activa al parto instrumental o cesárea',                            meta:20  },
+  { id:'puer',  cat:'Puerperio', desc:'Supervisión, cuidado y reconocimiento de puérperas',                         meta:100 },
+  { id:'rnsano',cat:'Neonatal',  desc:'Supervisión, cuidado y reconocimiento de RN sanos',                          meta:100 },
+  { id:'rnesp', cat:'Neonatal',  desc:'Observación y cuidado de RN que precisan cuidados especiales',               meta:20  },
+  { id:'cito',  cat:'Ginecología',desc:'Toma de muestras cervicales/vaginales (citologías, cultivos, etc.)',        meta:150 },
+  { id:'gine',  cat:'Ginecología',desc:'Asesoramiento y cuidado en materia de ginecología',                         meta:40  },
+  { id:'clima', cat:'Ginecología',desc:'Asesoramiento y cuidado en materia de climaterio',                          meta:20  },
+  { id:'its',   cat:'Ginecología',desc:'Detección y asesoramiento en infecciones de transmisión sexual',            meta:30  },
+  { id:'anticon',cat:'SSR',      desc:'Asesoramiento anticoncepción y sexualidad a mujeres (incl. CE e IVE)',       meta:60  },
+  { id:'jov',   cat:'SSR',       desc:'Atención y asesoramiento individual a jóvenes (sexualidad y contracepción)', meta:25  },
+  { id:'grupal',cat:'SSR',       desc:'Intervenciones grupales educación sexual y reproductiva en comunidad',       meta:2   },
+  { id:'clprog',cat:'SSR',       desc:'Participar activamente en programa sobre el climaterio',                     meta:1   },
+  { id:'visdom',cat:'AP',        desc:'Visitas domiciliarias al RN y a la puérpera',                                meta:0   },
+];
+
+const CATS = ['Todas','AP','Paritorio','Puerperio','Neonatal','Ginecología','SSR'];
+
+const ROTACIONES_R1 = [
+  { title:'Docencia inicial', icon:'📚' },
+  { title:'Urgencias / Triaje Obstétrico', icon:'🚨' },
+  { title:'Expectantes / Puerperio Inmediato', icon:'⏳' },
+  { title:'Paritorio I', icon:'🤱' },
+  { title:'Planta de Puerperio (Planta 6)', icon:'🛏️' },
+  { title:'FPF – Hospital de Día Obstétrico', icon:'📡' },
+  { title:'Atención Primaria I', icon:'🏥' },
+  { title:'Consulta CALMA', icon:'🤍' },
+];
+const ROTACIONES_R2 = [
+  { title:'Paritorio II', icon:'🤱' },
+  { title:'Fisiopatología Fetal / Planta 5ª', icon:'📡' },
+  { title:'Servicio de Neonatología', icon:'👶' },
+  { title:'Consultoría de Lactancia Materna', icon:'🍼' },
+  { title:'Educación Diabetológica', icon:'💉' },
+  { title:'Atención Primaria II', icon:'🏥' },
+  { title:'CAE – Consultas Externas', icon:'🩺' },
+  { title:'Suelo Pélvico', icon:'🧘' },
+  { title:'Bloque de Docencia final', icon:'📚' },
+];
+
+const COMPETENCIAS = [
+  { area:'Embarazo', items:['Diagnóstico, control y seguimiento del embarazo normal','Atención al binomio madre-hijo durante el embarazo','Seguimiento y control de gestante de alto riesgo','Educación prenatal y maternal','Diagnóstico prenatal: asesoramiento y solicitud'] },
+  { area:'Parto', items:['Asistencia a la mujer en el proceso de parto','Atención al binomio durante el parto','Reanimación neonatal inmediata','Atención al parto instrumental o cesárea','Soporte emocional a la mujer y familia'] },
+  { area:'Puerperio y Neonatal', items:['Supervisión de la puérpera','Cuidados y reconocimiento del RN sano','Cuidados del RN con necesidades especiales','Apoyo y mantenimiento de la lactancia materna','Detección precoz de complicaciones puerperales'] },
+  { area:'Salud Sexual y Reproductiva', items:['Asesoramiento anticonceptivo y sexualidad','Atención a jóvenes: sexualidad y contracepción','Prevención y asesoramiento en ITS','Intervenciones grupales educación sexual','Consejo preconcepcional y detección de riesgo'] },
+  { area:'Ginecología y Climaterio', items:['Detección precoz de cáncer ginecológico','Toma de muestras cervicales y vaginales','Asesoramiento y cuidados en ginecología','Atención a la mujer en el climaterio','Participación en programa de climaterio'] },
+  { area:'Profesionalismo', items:['Razonamiento clínico y toma de decisiones','Comunicación efectiva con mujer, familia y equipo','Práctica basada en evidencia científica','Registro y documentación clínica','Actividad docente e investigadora'] },
+];
+
+// ═══════════════════════════════════════════════
+//  STATE & PERSISTENCE
+// ═══════════════════════════════════════════════
+
+let S = {};
+
+function loadState(){
+  try { S = JSON.parse(localStorage.getItem('eir_state')||'{}'); } catch(e){ S={}; }
+  S.counts   = S.counts   || {};
+  S.sesiones = S.sesiones || {};  // {num: {fecha, firma}}
+  S.rotaR1   = S.rotaR1   || {};  // {idx: {inicio,fin,firma}}
+  S.rotaR2   = S.rotaR2   || {};
+  S.cursos   = S.cursos   || [];
+  S.comps    = S.comps    || {};  // {compKey: {r1,r2}}
+  S.reflex   = S.reflex   || [];
+  S.entrev   = S.entrev   || [];
+  S.perfil   = S.perfil   || {};
+  S.firmas   = S.firmas   || {};
+}
+function saveState(){ localStorage.setItem('eir_state', JSON.stringify(S)); }
+
+// ── COPIA DE SEGURIDAD ──
+const BACKUP_DIAS = 7; // recordatorio si pasan más de 7 días sin copia
+
+function hacerCopia(){
+  const data = JSON.stringify(S, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const p = S.perfil||{};
+  const nombre = ((p.nombre||'')+'_'+(p.apellidos||'')).trim().replace(/\s+/g,'_') || 'residente';
+  const fecha = new Date().toISOString().slice(0,10);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'CopiaLibroEIR_'+nombre+'_'+fecha+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  localStorage.setItem('eir_lastBackup', Date.now());
+  dismissReminder();
+  renderBackupBadge();
+  toast('Copia descargada ✓ Guárdala en tu Drive o correo');
+}
+
+function restaurarCopia(){
+  if(!confirm('Restaurar una copia reemplazará TODOS los datos actuales de este dispositivo por los del archivo. ¿Continuar?')) return;
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+  inp.onchange = e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const fr = new FileReader();
+    fr.onload = ev=>{
+      try{
+        const obj = JSON.parse(ev.target.result);
+        if(typeof obj!=='object'||obj===null) throw new Error('formato');
+        S = obj; loadStateDefaults(); saveState(); renderAll();
+        toast('Copia restaurada ✓');
+      }catch(err){ alert('El archivo no es una copia válida del Libro EIR.'); }
+    };
+    fr.readAsText(file);
+  };
+  inp.click();
+}
+
+// rellena claves que falten tras restaurar
+function loadStateDefaults(){
+  S.counts=S.counts||{}; S.sesiones=S.sesiones||{}; S.rotaR1=S.rotaR1||{}; S.rotaR2=S.rotaR2||{};
+  S.cursos=S.cursos||[]; S.comps=S.comps||{}; S.reflex=S.reflex||[]; S.entrev=S.entrev||[];
+  S.perfil=S.perfil||{}; S.firmas=S.firmas||{};
+}
+
+function hayDatos(){
+  return Object.keys(S.counts).length>0 || Object.keys(S.sesiones).length>0 ||
+         (S.cursos&&S.cursos.length) || (S.reflex&&S.reflex.length) ||
+         (S.entrev&&S.entrev.filter(Boolean).length) || (S.perfil&&S.perfil.nombre);
+}
+
+function diasDesdeCopia(){
+  const last = parseInt(localStorage.getItem('eir_lastBackup')||'0');
+  if(!last) return null;
+  return Math.floor((Date.now()-last)/(1000*60*60*24));
+}
+
+function renderBackupBadge(){
+  const el = document.getElementById('backupBadge'); if(!el) return;
+  const d = diasDesdeCopia();
+  if(d===null) el.textContent='sin copias aún';
+  else if(d===0) el.textContent='copia hoy ✓';
+  else el.textContent='hace '+d+' día'+(d===1?'':'s');
+}
+
+function checkBackupReminder(){
+  const banner=document.getElementById('backupReminder');
+  const txt=document.getElementById('backupReminderText');
+  if(!banner) return;
+  if(localStorage.getItem('eir_reminderDismissed')===new Date().toDateString()){ banner.style.display='none'; return; }
+  if(!hayDatos()){ banner.style.display='none'; return; }
+  const last=parseInt(localStorage.getItem('eir_lastBackup')||'0');
+  const d=diasDesdeCopia();
+  let show=false, msg='';
+  if(!last){ show=true; msg='⚠️ Aún no has hecho ninguna copia de seguridad. Tus datos solo están en este móvil — haz una copia para no perderlos.'; }
+  else if(d>=BACKUP_DIAS){ show=true; msg='⚠️ Hace '+d+' días que no haces copia de seguridad. Conviene hacer una para proteger tus registros.'; }
+  if(show){ txt.textContent=msg; banner.style.display='block'; }
+  else banner.style.display='none';
+}
+
+function dismissReminder(){
+  localStorage.setItem('eir_reminderDismissed', new Date().toDateString());
+  const b=document.getElementById('backupReminder'); if(b) b.style.display='none';
+}
+
+// ── FIRMA DIGITAL ──
+let firmaTarget=null, firmaCtx=null, drawing=false, hasDrawn=false;
+function openFirma(who){
+  firmaTarget=who;
+  document.getElementById('firmaTitle').textContent = who==='residente'?'Firma de la residente':'Firma de la tutora';
+  document.getElementById('firmaOverlay').classList.add('open');
+  const canvas=document.getElementById('firmaCanvas');
+  firmaCtx=canvas.getContext('2d');
+  firmaCtx.lineWidth=2.5; firmaCtx.lineCap='round'; firmaCtx.strokeStyle='#1a3a5c';
+  clearFirma();
+  // load existing
+  const existing = S.firmas && S.firmas[who];
+  if(existing){ const img=new Image(); img.onload=()=>{firmaCtx.drawImage(img,0,0,canvas.width,canvas.height); hasDrawn=true;}; img.src=existing; }
+  bindFirmaEvents(canvas);
+}
+function bindFirmaEvents(canvas){
+  const pos=e=>{
+    const r=canvas.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    return {x:(t.clientX-r.left)*(canvas.width/r.width), y:(t.clientY-r.top)*(canvas.height/r.height)};
+  };
+  const start=e=>{e.preventDefault();drawing=true;hasDrawn=true;const p=pos(e);firmaCtx.beginPath();firmaCtx.moveTo(p.x,p.y);};
+  const move=e=>{if(!drawing)return;e.preventDefault();const p=pos(e);firmaCtx.lineTo(p.x,p.y);firmaCtx.stroke();};
+  const end=()=>{drawing=false;};
+  canvas.onmousedown=start; canvas.onmousemove=move; canvas.onmouseup=end; canvas.onmouseleave=end;
+  canvas.ontouchstart=start; canvas.ontouchmove=move; canvas.ontouchend=end;
+}
+function clearFirma(){ const c=document.getElementById('firmaCanvas'); firmaCtx.clearRect(0,0,c.width,c.height); hasDrawn=false; }
+function saveFirma(){
+  if(!hasDrawn){ toast('Dibuja la firma primero'); return; }
+  S.firmas = S.firmas || {};
+  S.firmas[firmaTarget] = document.getElementById('firmaCanvas').toDataURL('image/png');
+  saveState(); renderFirmas(); closeFirma(); toast('Firma guardada ✓');
+}
+function closeFirma(e){ if(e&&e.target!==document.getElementById('firmaOverlay'))return; document.getElementById('firmaOverlay').classList.remove('open'); }
+function renderFirmas(){
+  const f=S.firmas||{};
+  document.getElementById('firmaResPreview').innerHTML = f.residente?`<img src="${f.residente}">`:'<span class="empty">Sin firmar</span>';
+  document.getElementById('firmaTutPreview').innerHTML = f.tutora?`<img src="${f.tutora}">`:'<span class="empty">Sin firmar</span>';
+}
+
+// ── GENERAR PDF (imprimible) ──
+function generarPDF(){
+  const p=S.perfil||{}, f=S.firmas||{};
+  const nombre=((p.nombre||'')+' '+(p.apellidos||'')).trim()||'Residente';
+  const hoy=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Actividades table
+  let actRows='';
+  ACTIVIDADES.forEach(a=>{
+    const c=S.counts[a.id]||0;
+    const ok=a.meta>0 && c>=a.meta;
+    actRows+=`<tr><td>${a.cat}</td><td>${a.desc}</td><td class="ctr">${a.meta>0?a.meta:'—'}</td><td class="ctr"><b>${c}</b></td><td class="ctr">${ok?'✓':(a.meta>0?Math.round(c/a.meta*100)+'%':'')}</td></tr>`;
+  });
+
+  // Rotaciones
+  const rotaTable=(rots,store,yr)=>rots.map((r,i)=>{const d=store[i]||{};return `<tr><td>${r.title}</td><td class="ctr">${d.inicio||'—'}</td><td class="ctr">${d.fin||'—'}</td><td>${d.firma||''}</td></tr>`;}).join('');
+
+  // Sesiones
+  const sesCount=Object.keys(S.sesiones||{}).length;
+  let sesRows='';
+  for(let i=1;i<=36;i++){const s=(S.sesiones||{})[i];sesRows+=`<tr><td class="ctr">${i}</td><td>${s&&s.tema?s.tema:''}</td><td class="ctr">${s?s.fecha:'—'}</td><td>${s?(s.firma||'Firmado'):''}</td></tr>`;}
+
+  // Competencias
+  let compRows='';
+  COMPETENCIAS.forEach(area=>{
+    compRows+=`<tr class="area"><td colspan="2">${area.area}</td></tr>`;
+    area.items.forEach((item,j)=>{const v=(S.comps||{})[area.area+j]||0;compRows+=`<tr><td>${item}</td><td class="ctr">${v>0?'★'.repeat(v)+'☆'.repeat(5-v):'—'}</td></tr>`;});
+  });
+
+  // Cursos
+  const cursosRows=(S.cursos||[]).map(c=>`<tr><td>${c.titulo}</td><td>${c.entidad}</td><td class="ctr">${c.fecha}</td><td class="ctr">${c.horas}h</td><td class="ctr">${c.eval||''}</td></tr>`).join('')||'<tr><td colspan="5" class="ctr">Sin registros</td></tr>';
+
+  // Entrevistas
+  let entRows='';
+  for(let i=0;i<8;i++){const e=(S.entrev||[])[i];entRows+=`<tr><td class="ctr">${i+1}ª</td><td class="ctr">${e?e.fecha:'—'}</td><td>${e?e.lugar:''}</td><td class="ctr">${e?e.duracion+' min':''}</td><td>${e?(e.firma||''):''}</td></tr>`;}
+
+  // Reflexiones
+  const reflexHtml=(S.reflex||[]).map(r=>`<div class="reflex"><h4>${r.rota} · ${r.fecha}</h4>
+    <p><b>Actividades:</b> ${r.actividades||'—'}</p>
+    <p><b>Aprendizajes:</b> ${r.positivos||'—'}</p>
+    <p><b>A mejorar:</b> ${r.mejoras||'—'}</p>
+    <p><b>Plan:</b> ${r.plan||'—'}</p></div>`).join('')||'<p class="muted">Sin reflexiones registradas</p>';
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Libro EIR · ${nombre}</title>
+  <style>
+    @page{margin:1.6cm;}
+    body{font-family:Arial,sans-serif;color:#1e2b3a;font-size:11px;line-height:1.4;}
+    h1{color:#1a3a5c;font-size:20px;border-bottom:3px solid #5ba0bd;padding-bottom:8px;}
+    h2{color:#1a3a5c;font-size:14px;margin-top:24px;border-left:4px solid #2e6da4;padding-left:8px;page-break-after:avoid;}
+    .cover{text-align:center;padding:40px 0;}
+    .cover .sub{color:#5a6a7a;font-size:13px;margin-top:6px;}
+    .meta{background:#f0f4f8;border-radius:8px;padding:12px 16px;margin:16px 0;}
+    .meta div{margin:3px 0;}
+    .meta b{color:#1a3a5c;}
+    table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:10px;}
+    th{background:#1a3a5c;color:#fff;padding:6px;text-align:left;font-size:10px;}
+    td{border:1px solid #cdd9e6;padding:5px 6px;vertical-align:top;}
+    tr:nth-child(even) td{background:#f5f8fb;}
+    .ctr{text-align:center;}
+    tr.area td{background:#dce8f2;font-weight:bold;color:#1a3a5c;}
+    .firmas{display:flex;gap:40px;margin-top:30px;page-break-inside:avoid;}
+    .firma-box{flex:1;text-align:center;}
+    .firma-box img{max-height:70px;display:block;margin:0 auto 4px;}
+    .firma-box .line{border-top:1.5px solid #1a3a5c;padding-top:6px;font-size:10px;color:#1a3a5c;font-weight:bold;}
+    .firma-box .ph{height:70px;}
+    .reflex{background:#f5f8fb;border-radius:6px;padding:10px;margin:8px 0;page-break-inside:avoid;}
+    .reflex h4{color:#1a3a5c;font-size:11px;margin-bottom:4px;}
+    .reflex p{margin:2px 0;}
+    .muted{color:#5a6a7a;font-style:italic;}
+    .pb{page-break-before:always;}
+    @media print{button{display:none;}}
+    .printbtn{position:fixed;top:10px;right:10px;background:#2e6da4;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px;}
+  </style></head><body>
+  <button class="printbtn" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+
+  <div class="cover">
+    <h1 style="border:none;">📒 Libro del Especialista en Formación</h1>
+    <div class="sub">Enfermería Obstétrico-Ginecológica (Matrona)</div>
+    <div class="sub">Unidad Docente Multiprofesional de Obstetricia y Ginecología · Las Palmas de Gran Canaria</div>
+  </div>
+
+  <div class="meta">
+    <div><b>Residente:</b> ${nombre}</div>
+    <div><b>Promoción:</b> ${p.promo||'—'}</div>
+    <div><b>Correo:</b> ${p.email||'—'}</div>
+    <div><b>Toma de posesión:</b> ${p.fecha||'—'}</div>
+    <div><b>Tutora:</b> ${p.tutora||'—'}</div>
+    <div><b>Documento generado:</b> ${hoy}</div>
+  </div>
+
+  <h2>1 · Actividades mínimas (POE)</h2>
+  <table><tr><th>Área</th><th>Actividad</th><th>Mínimo</th><th>Realizado</th><th>%</th></tr>${actRows}</table>
+
+  <h2 class="pb">2 · Rotaciones · Primer año (R1)</h2>
+  <table><tr><th>Unidad / Servicio</th><th>Inicio</th><th>Fin</th><th>Firma tutora</th></tr>${rotaTable(ROTACIONES_R1,S.rotaR1||{})}</table>
+  <h2>Rotaciones · Segundo año (R2)</h2>
+  <table><tr><th>Unidad / Servicio</th><th>Inicio</th><th>Fin</th><th>Firma tutora</th></tr>${rotaTable(ROTACIONES_R2,S.rotaR2||{})}</table>
+
+  <h2 class="pb">3 · Cursos y talleres</h2>
+  <table><tr><th>Título</th><th>Entidad</th><th>Fecha</th><th>Horas</th><th>Evaluación</th></tr>${cursosRows}</table>
+
+  <h2>4 · Entrevistas con la tutora</h2>
+  <table><tr><th>Nº</th><th>Fecha</th><th>Lugar</th><th>Duración</th><th>Firma</th></tr>${entRows}</table>
+
+  <h2>5 · Sesiones clínicas (${sesCount}/36)</h2>
+  <table><tr><th>Nº</th><th>Tema / Nombre de la sesión</th><th>Fecha</th><th>Firma</th></tr>${sesRows}</table>
+
+  <h2 class="pb">6 · Autoevaluación de competencias</h2>
+  <table><tr><th>Competencia</th><th>Nivel (1–5)</th></tr>${compRows}</table>
+
+  <h2 class="pb">7 · Informes de reflexión</h2>
+  ${reflexHtml}
+
+  <h2 class="pb">8 · Firmas de formalización</h2>
+  <div class="firmas">
+    <div class="firma-box">
+      ${f.residente?'<img src="'+f.residente+'">':'<div class="ph"></div>'}
+      <div class="line">Firma de la residente<br>${nombre}</div>
+    </div>
+    <div class="firma-box">
+      ${f.tutora?'<img src="'+f.tutora+'">':'<div class="ph"></div>'}
+      <div class="line">Firma de la tutora<br>${p.tutora||''}</div>
+    </div>
+  </div>
+  </body></html>`;
+
+  const w=window.open('','_blank');
+  if(!w){ toast('Permite las ventanas emergentes'); return; }
+  w.document.write(html); w.document.close();
+  toast('PDF generado · usa Imprimir → Guardar como PDF');
+}
+
+function resetAll(){
+  if(!confirm('¿Borrar todos los datos? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem('eir_state'); loadState(); renderAll(); toast('Datos borrados');
+}
+
+// ═══════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════
+
+let currentTab = 'inicio';
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelectorAll('nav button').forEach((b,i)=>{
+    const tabs=['inicio','actividades','sesiones','rotaciones','cursos','competencias','reflexiones','entrevistas','perfil'];
+    b.classList.toggle('active', tabs[i]===id);
+  });
+  currentTab = id;
+  const fab = document.getElementById('fabGlobal');
+  fab.style.display = ['cursos','reflexiones','entrevistas'].includes(id) ? 'none' : 'flex';
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – INICIO
+// ═══════════════════════════════════════════════
+
+function renderInicio(){
+  // overview cards
+  const total = ACTIVIDADES.length;
+  let completed = 0, totalItems=0, doneItems=0, urgent=[];
+  ACTIVIDADES.forEach(a=>{
+    const c = S.counts[a.id]||0;
+    if(a.meta>0){ totalItems+=a.meta; doneItems+=Math.min(c,a.meta); }
+    if(a.meta>0 && c>=a.meta) completed++;
+    const pct = a.meta>0 ? c/a.meta : 1;
+    if(a.meta>0 && pct<0.5) urgent.push({...a, pct});
+  });
+  urgent.sort((a,b)=>a.pct-b.pct);
+
+  const sesTotal=36, sesSigned=Object.keys(S.sesiones).length;
+  const pct = totalItems>0 ? Math.round(doneItems/totalItems*100) : 0;
+
+  document.getElementById('overviewGrid').innerHTML=`
+    <div class="ov-card highlight">
+      <div class="ov-num">${pct}%</div>
+      <div class="ov-label">Progreso actividades mínimas</div>
+      <div class="ov-sub">${doneItems} de ${totalItems} registradas</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num">${completed}</div>
+      <div class="ov-label">Actividades completadas</div>
+      <div class="ov-sub">de ${total} requeridas</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num">${sesSigned}</div>
+      <div class="ov-label">Sesiones registradas</div>
+      <div class="ov-sub">mínimo 36 recomendadas</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num">${S.entrev.length}</div>
+      <div class="ov-label">Entrevistas con tutora</div>
+      <div class="ov-sub">mín. 8 en los 2 años</div>
+    </div>
+  `;
+
+  // urgent
+  document.getElementById('urgentBadge').textContent = urgent.length>0 ? urgent.length+' pendientes' : '✓ al día';
+  const ul = document.getElementById('urgentList');
+  if(urgent.length===0){ ul.innerHTML='<p style="font-size:.82rem;color:var(--ok);font-weight:600;">🎉 ¡Todas las actividades están al día!</p>'; return; }
+  ul.innerHTML = urgent.slice(0,5).map(a=>{
+    const c=S.counts[a.id]||0; const pct=Math.round(c/a.meta*100);
+    return `<div class="act-item" style="margin-bottom:10px;">
+      <div class="act-header"><span class="act-desc">${a.desc}</span><span class="act-target">${c}/${a.meta}</span></div>
+      <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill ${pct>=100?'done':''}" style="width:${Math.min(pct,100)}%"></div></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – ACTIVIDADES
+// ═══════════════════════════════════════════════
+
+let activeCat = 'Todas';
+function renderActividades(){
+  // chips
+  document.getElementById('actChips').innerHTML = CATS.map(c=>
+    `<button class="chip ${c===activeCat?'active':''}" onclick="filterCat('${c}')">${c}</button>`
+  ).join('');
+
+  const items = activeCat==='Todas' ? ACTIVIDADES : ACTIVIDADES.filter(a=>a.cat===activeCat);
+  document.getElementById('actList').innerHTML = items.map(a=>{
+    const c = S.counts[a.id]||0;
+    const pct = a.meta>0 ? Math.min(Math.round(c/a.meta*100),100) : (c>0?100:0);
+    return `
+    <div class="card act-item ${a.meta>0&&c>=a.meta?'done':''}">
+      <div class="card-body" style="padding:12px 14px;">
+        <div class="act-header">
+          <span class="act-desc"><strong>${a.cat}</strong> · ${a.desc}</span>
+          <span class="act-target">${a.meta>0?a.meta+' min.':''}</span>
+        </div>
+        ${a.meta>0?`<div class="prog-wrap">
+          <div class="prog-label"><span>${c} registradas</span><span>${pct}%</span></div>
+          <div class="prog-bar"><div class="prog-fill ${pct>=100?'done':''}" style="width:${pct}%"></div></div>
+        </div>`:''}
+        <div class="act-controls" style="margin-top:10px;">
+          <button onclick="decAct('${a.id}')">−</button>
+          <span class="act-count">${c}</span>
+          <button onclick="incAct('${a.id}')">+</button>
+          <button onclick="openModal('actLog','${a.id}')" style="margin-left:auto;font-size:.72rem;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sky);background:var(--white);color:var(--navy);cursor:pointer;font-weight:600;">📝 Detallar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterCat(cat){ activeCat=cat; renderActividades(); }
+function incAct(id){ S.counts[id]=(S.counts[id]||0)+1; saveState(); renderActividades(); renderInicio(); toast('+1 registrado'); }
+function decAct(id){ if((S.counts[id]||0)>0){ S.counts[id]--; saveState(); renderActividades(); renderInicio(); } }
+
+// ═══════════════════════════════════════════════
+//  RENDER – SESIONES
+// ═══════════════════════════════════════════════
+
+function renderSesiones(){
+  const signed = Object.keys(S.sesiones).length;
+  document.getElementById('sesionBadge').textContent = signed+'/36 firmadas';
+  let html='';
+  for(let i=1;i<=36;i++){
+    const s = S.sesiones[i];
+    html+=`<div class="sesion-row ${s?'signed':''}">
+      <div class="sesion-num">${i}</div>
+      <div class="sesion-info">
+        ${s?`${s.tema?`<div class="sesion-tema">${s.tema}</div>`:''}<div class="sesion-date">${s.fecha}</div><div class="sesion-firma">✓ ${s.firma||'Firmado'}</div>`
+           :`<div class="sesion-date" style="color:var(--muted);font-size:.78rem;">Pendiente</div>`}
+      </div>
+      <button class="sesion-btn" onclick="firmarSesion(${i})">${s?'Editar':'Registrar'}</button>
+    </div>`;
+  }
+  document.getElementById('sesionList').innerHTML=html;
+}
+function firmarSesion(num){
+  const existing = S.sesiones[num]||{};
+  openModalHTML('sesion',`<label>Tema / Nombre de la sesión</label><input id="sf-tema" placeholder="Ej.: Manejo del expulsivo" value="${existing.tema||''}">
+    <label>Fecha</label><input type="date" id="sf-fecha" value="${existing.fecha||new Date().toISOString().slice(0,10)}">
+    <label>Firmante (tutora/colaboradora)</label><input id="sf-firma" placeholder="Nombre" value="${existing.firma||''}">`,
+    ()=>{ S.sesiones[num]={tema:document.getElementById('sf-tema').value, fecha:document.getElementById('sf-fecha').value, firma:document.getElementById('sf-firma').value};
+      saveState(); renderSesiones(); closeModal(); toast('Sesión '+num+' registrada ✓');
+    }, `Sesión clínica #${num}`);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – ROTACIONES
+// ═══════════════════════════════════════════════
+
+function renderRotaciones(){
+  ['R1','R2'].forEach(yr=>{
+    const rots = yr==='R1'?ROTACIONES_R1:ROTACIONES_R2;
+    const store = yr==='R1'?S.rotaR1:S.rotaR2;
+    document.getElementById('rota'+yr).innerHTML = rots.map((r,i)=>{
+      const d = store[i]||{};
+      return `<div class="rota-item">
+        <div class="rota-dot ${d.firma?'ok':''}"></div>
+        <div class="rota-info">
+          <div class="rota-title">${r.icon} ${r.title}</div>
+          ${d.inicio?`<div class="rota-dates">${d.inicio} → ${d.fin||'…'}</div>`:'<div class="rota-dates" style="color:var(--muted)">Sin fechas</div>'}
+          ${d.firma?`<div class="rota-signed">✓ Firmado por ${d.firma}</div>`:''}
+        </div>
+        <button class="sesion-btn" onclick="editRota('${yr}',${i})">${d.inicio?'Editar':'Registrar'}</button>
+      </div>`;
+    }).join('');
+  });
+}
+function editRota(yr,idx){
+  const store = yr==='R1'?S.rotaR1:S.rotaR2;
+  const d = store[idx]||{};
+  const title = (yr==='R1'?ROTACIONES_R1:ROTACIONES_R2)[idx].title;
+  openModalHTML('rota',`
+    <label>Fecha de inicio</label><input type="date" id="rt-ini" value="${d.inicio||''}">
+    <label>Fecha de fin</label><input type="date" id="rt-fin" value="${d.fin||''}">
+    <label>Tutora / Colaboradora docente</label><input id="rt-firma" placeholder="Nombre" value="${d.firma||''}">
+    <label>Observaciones</label><textarea id="rt-obs">${d.obs||''}</textarea>`,
+    ()=>{
+      store[idx]={inicio:document.getElementById('rt-ini').value, fin:document.getElementById('rt-fin').value,
+        firma:document.getElementById('rt-firma').value, obs:document.getElementById('rt-obs').value};
+      saveState(); renderRotaciones(); closeModal(); toast('Rotación guardada ✓');
+    }, title);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – CURSOS
+// ═══════════════════════════════════════════════
+
+function renderCursos(){
+  document.getElementById('cursosBadge').textContent = S.cursos.length+' registrados';
+  if(!S.cursos.length){ document.getElementById('cursosList').innerHTML='<p style="font-size:.82rem;color:var(--muted);">Aún no hay cursos registrados. Usa el botón + para añadir.</p>'; return; }
+  document.getElementById('cursosList').innerHTML = S.cursos.map((c,i)=>`
+    <div class="curso-item">
+      <div class="curso-title">${c.titulo}</div>
+      <div class="curso-meta">${c.entidad} · ${c.fecha} · <strong>${c.horas}h</strong>
+        ${c.año?`<span class="tag" style="margin-left:6px;">R${c.año}</span>`:''}
+        ${c.eval?`<span class="tag" style="margin-left:4px;">${c.eval}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – COMPETENCIAS
+// ═══════════════════════════════════════════════
+
+function renderCompetencias(){
+  document.getElementById('compList').innerHTML = COMPETENCIAS.map(area=>`
+    <div class="card comp-area">
+      <div class="card-head"><h2>${area.area}</h2></div>
+      <div class="card-body">
+        ${area.items.map((item,j)=>{
+          const key=area.area+j;
+          const val=S.comps[key]||0;
+          return `<div class="comp-row">
+            <span class="comp-desc">${item}</span>
+            <div class="star-row">${[1,2,3,4,5].map(s=>`<span class="star ${val>=s?'on':''}" onclick="setComp('${key}',${s})">★</span>`).join('')}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+function setComp(key,val){ S.comps[key]=val; saveState(); renderCompetencias(); }
+
+// ═══════════════════════════════════════════════
+//  RENDER – REFLEXIONES
+// ═══════════════════════════════════════════════
+
+function renderReflexiones(){
+  if(!S.reflex.length){ return; }
+  document.getElementById('reflexList').innerHTML = S.reflex.map(r=>`
+    <div class="reflex-card">
+      <div class="reflex-header"><span class="reflex-rota">${r.rota}</span><span class="reflex-date">${r.fecha}</span></div>
+      <div class="reflex-body">
+        <p><strong>Actividades:</strong> ${r.actividades}</p>
+        ${r.positivos?`<p style="margin-top:5px;"><strong>✓ Positivo:</strong> ${r.positivos}</p>`:''}
+        ${r.mejoras?`<p style="margin-top:5px;"><strong>→ A mejorar:</strong> ${r.mejoras}</p>`:''}
+        ${r.plan?`<p style="margin-top:5px;"><strong>📌 Plan:</strong> ${r.plan}</p>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – ENTREVISTAS
+// ═══════════════════════════════════════════════
+
+function renderEntrevistas(){
+  const all = S.entrev;
+  document.getElementById('entrevistaList').innerHTML = [1,2,3,4,5,6,7,8].map(n=>{
+    const e=all[n-1];
+    return `<div class="entrevista-item">
+      <div class="ent-num">${n}</div>
+      <div class="ent-info">
+        ${e?`<div class="ent-meta">${e.fecha} · ${e.lugar} · ${e.duracion} min.</div>
+              <div class="ent-firma">✓ ${e.firma||'Firmada'}</div>`
+           :`<div class="ent-empty">Pendiente de realizar</div>`}
+      </div>
+      <button class="sesion-btn" onclick="editEntrevista(${n-1})">${e?'Editar':'Registrar'}</button>
+    </div>`;
+  }).join('');
+}
+function editEntrevista(idx){
+  const e=S.entrev[idx]||{};
+  openModalHTML('entrev',`
+    <label>Fecha</label><input type="date" id="en-fecha" value="${e.fecha||new Date().toISOString().slice(0,10)}">
+    <label>Lugar</label><input id="en-lugar" placeholder="Lugar" value="${e.lugar||''}">
+    <label>Duración (min.)</label><input type="number" id="en-dur" placeholder="30" value="${e.duracion||''}">
+    <label>Firmante (tutora)</label><input id="en-firma" placeholder="Nombre" value="${e.firma||''}">
+    <label>Observaciones</label><textarea id="en-obs">${e.obs||''}</textarea>`,
+    ()=>{
+      const d={fecha:document.getElementById('en-fecha').value, lugar:document.getElementById('en-lugar').value,
+        duracion:document.getElementById('en-dur').value, firma:document.getElementById('en-firma').value,
+        obs:document.getElementById('en-obs').value};
+      while(S.entrev.length<=idx) S.entrev.push(null);
+      S.entrev[idx]=d; saveState(); renderEntrevistas(); closeModal(); toast('Entrevista guardada ✓');
+    }, `Entrevista ${idx+1}ª con la tutora`);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER – PERFIL
+// ═══════════════════════════════════════════════
+
+function renderPerfil(){
+  const p=S.perfil;
+  ['nombre','apellidos','email','promo','fecha','tutora','tutora-email'].forEach(f=>{
+    const el=document.getElementById('dp-'+f); if(el) el.value=p[f]||'';
+  });
+  const name = p.nombre ? p.nombre.split(' ')[0] : null;
+  document.getElementById('nameTag').textContent = name ? '👤 '+name : '⚙ Mi perfil';
+}
+function savePerfil(){
+  S.perfil={
+    nombre:document.getElementById('dp-nombre').value,
+    apellidos:document.getElementById('dp-apellidos').value,
+    email:document.getElementById('dp-email').value,
+    promo:document.getElementById('dp-promo').value,
+    fecha:document.getElementById('dp-fecha').value,
+    tutora:document.getElementById('dp-tutora').value,
+    'tutora-email':document.getElementById('dp-tutora-email').value,
+  };
+  saveState(); renderPerfil(); toast('Perfil guardado ✓');
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL SYSTEM
+// ═══════════════════════════════════════════════
+
+let modalCallback = null;
+function openModal(type, extra){
+  const modal=document.getElementById('modal');
+  const title=document.getElementById('modalTitle');
+  const body=document.getElementById('modalBody');
+  document.getElementById('overlay').classList.add('open');
+
+  if(type==='actividad'){
+    title.textContent='Registrar actividad';
+    const options=ACTIVIDADES.map(a=>`<option value="${a.id}">${a.desc}</option>`).join('');
+    body.innerHTML=`
+      <label>Actividad</label>
+      <select id="m-act">${options}</select>
+      <label>Cantidad a añadir</label>
+      <input type="number" id="m-cant" value="1" min="1">
+      <label>Fecha</label>
+      <input type="date" id="m-fecha" value="${new Date().toISOString().slice(0,10)}">
+      <label>Observaciones (opcional)</label>
+      <textarea id="m-obs" placeholder="Notas, nombre colaboradora..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveActividad()">Guardar</button>
+      </div>`;
+  } else if(type==='actLog'){
+    const act = ACTIVIDADES.find(a=>a.id===extra);
+    title.textContent = act?act.desc:'Actividad';
+    body.innerHTML=`
+      <label>Fecha</label><input type="date" id="m-fecha" value="${new Date().toISOString().slice(0,10)}">
+      <label>Cantidad</label><input type="number" id="m-cant" value="1" min="1">
+      <label>Observaciones</label><textarea id="m-obs" placeholder="Nombre colaboradora, notas..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveActLog('${extra}')">Guardar</button>
+      </div>`;
+  } else if(type==='curso'){
+    title.textContent='Añadir curso o taller';
+    body.innerHTML=`
+      <label>Título</label><input id="c-tit" placeholder="Nombre del curso">
+      <label>Entidad organizadora</label><input id="c-ent" placeholder="Hospital, sociedad, etc.">
+      <label>Fecha</label><input type="date" id="c-fecha" value="${new Date().toISOString().slice(0,10)}">
+      <label>Horas</label><input type="number" id="c-h" placeholder="8" min="1">
+      <label>Año de residencia</label>
+      <select id="c-año"><option value="">—</option><option value="1">R1</option><option value="2">R2</option></select>
+      <label>Evaluación obtenida</label><input id="c-eval" placeholder="Apto / Notable...">
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveCurso()">Guardar</button>
+      </div>`;
+  } else if(type==='reflex'){
+    const allRots=[...ROTACIONES_R1,...ROTACIONES_R2].map(r=>r.title);
+    title.textContent='Informe de reflexión';
+    body.innerHTML=`
+      <label>Rotación</label>
+      <select id="rf-rota">${allRots.map(r=>`<option>${r}</option>`).join('')}</select>
+      <label>Fecha</label><input type="date" id="rf-fecha" value="${new Date().toISOString().slice(0,10)}">
+      <label>Descripción de actividades realizadas</label><textarea id="rf-act" placeholder="¿Qué hiciste?"></textarea>
+      <label>Aspectos positivos y aprendizajes</label><textarea id="rf-pos" placeholder="¿Qué aprendiste?"></textarea>
+      <label>Aspectos a mejorar</label><textarea id="rf-mej" placeholder="¿Qué te falta?"></textarea>
+      <label>Plan de aprendizaje</label><textarea id="rf-plan" placeholder="¿Cómo lo vas a aprender?"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveReflex()">Guardar</button>
+      </div>`;
+  } else if(type==='entrevista'){
+    editEntrevista(S.entrev.length);
+    return;
+  }
+}
+
+function openModalHTML(id, html, cb, title=''){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=html+`
+    <div class="btn-row">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="modal-ok-btn">Guardar</button>
+    </div>`;
+  document.getElementById('modal-ok-btn').onclick=()=>{cb(); closeModal();};
+  document.getElementById('overlay').classList.add('open');
+  modalCallback=cb;
+}
+function closeModal(e){ if(e&&e.target!==document.getElementById('overlay'))return; document.getElementById('overlay').classList.remove('open'); }
+
+function saveActividad(){
+  const id=document.getElementById('m-act').value;
+  const cant=parseInt(document.getElementById('m-cant').value)||1;
+  S.counts[id]=(S.counts[id]||0)+cant;
+  saveState(); closeModal(); renderActividades(); renderInicio(); toast('+'+cant+' registrados ✓');
+}
+function saveActLog(id){
+  const cant=parseInt(document.getElementById('m-cant').value)||1;
+  S.counts[id]=(S.counts[id]||0)+cant;
+  saveState(); closeModal(); renderActividades(); renderInicio(); toast('+'+cant+' registrados ✓');
+}
+function saveCurso(){
+  S.cursos.push({titulo:document.getElementById('c-tit').value, entidad:document.getElementById('c-ent').value,
+    fecha:document.getElementById('c-fecha').value, horas:document.getElementById('c-h').value,
+    año:document.getElementById('c-año').value, eval:document.getElementById('c-eval').value});
+  saveState(); closeModal(); renderCursos(); toast('Curso registrado ✓');
+}
+function saveReflex(){
+  S.reflex.push({rota:document.getElementById('rf-rota').value, fecha:document.getElementById('rf-fecha').value,
+    actividades:document.getElementById('rf-act').value, positivos:document.getElementById('rf-pos').value,
+    mejoras:document.getElementById('rf-mej').value, plan:document.getElementById('rf-plan').value});
+  saveState(); closeModal(); renderReflexiones(); toast('Reflexión guardada ✓');
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+
+function renderAll(){
+  renderInicio(); renderActividades(); renderSesiones(); renderRotaciones();
+  renderCursos(); renderCompetencias(); renderReflexiones(); renderEntrevistas(); renderPerfil(); renderFirmas(); renderBackupBadge();
+}
+
+loadState(); renderAll(); checkBackupReminder();
+</script>
+</body>
+</html>
